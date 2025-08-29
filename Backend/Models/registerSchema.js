@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
+import validator from 'validator'
 
 const regSchema =new mongoose.Schema({
     username:{
@@ -19,10 +20,10 @@ const regSchema =new mongoose.Schema({
         lowercase: true,
         validate: {
         validator: function(value){
-            validator.isEmail(value)
+            return validator.isEmail(value)
         },
-        messsage: "Please provide a valid email address"
-    }
+        message: "Please provide a valid email address"
+    },
     },
 
     password:{
@@ -40,10 +41,13 @@ regSchema.pre('save', async function (next){
     if(!this.isModified('password')) return next();
     try {
         const salt= await bcrypt.genSalt(10);
-        this.password=await bycrypt.hash(this.password, salt);
+        this.password=await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
         next(error);
     }
 })
+
+const User= mongoose.model("User", regSchema)
+export default User
 
